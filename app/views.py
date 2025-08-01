@@ -6,8 +6,8 @@ from rest_framework import status, permissions
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
-from app.serializers import CustomerSerializer, LoginSerializer, ProcessSerializer, CategorySerializer, ProjectSerializer, UserCreateSerializer, UserSerializer, UserUpdateSerializer
-from .models import Customer, Process, Category, CustomUser, Project
+from app.serializers import CustomerSerializer, LoginSerializer, ProcessSerializer, CategorySerializer, ProjectSerializer, UserCreateSerializer, UserSerializer, UserUpdateSerializer, WorkRecordCreateSerializer, WorkRecordSerializer
+from .models import Customer, Process, Category, CustomUser, Project, WorkRecord
 from rest_framework.decorators import api_view
 from rest_framework.decorators import permission_classes
 from rest_framework.decorators import action
@@ -33,7 +33,7 @@ class CustomerViewSet(ModelViewSet):
     lookup_field = "customerNo"
 
 class ProjectViewSet(ModelViewSet):
-    queryset = Project.objects.select_related("customerNo").all().order_by("projectNo")
+    queryset = Project.objects.select_related("customer").all().order_by("projectNo")
     serializer_class = ProjectSerializer
     permission_classes = [AllowAny]
     lookup_field = 'projectNo'
@@ -120,3 +120,13 @@ def logout_view(request):
 def user_view(request):
     serializer = UserSerializer(request.user)
     return Response(serializer.data)
+
+class WorkRecordViewSet(ModelViewSet):
+    queryset = WorkRecord.objects.select_related('user', 'project', 'project__customer', 'category', 'process').all()
+    permission_classes = [AllowAny]
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return WorkRecordCreateSerializer
+        return WorkRecordSerializer
+    

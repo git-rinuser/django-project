@@ -11,6 +11,9 @@ class Process(models.Model):
         db_table = "Process"
         verbose_name = "工程"
 
+    def __str__(self):
+        return f"{self.processNo}:{self.processName}"
+
 # 作業分類マスタ
 class Category(models.Model):
     categoryNo = models.CharField(max_length=2, primary_key=True)
@@ -19,6 +22,9 @@ class Category(models.Model):
     class Meta:
         db_table = "Category"
         verbose_name = "作業分類"
+
+    def __str__(self):
+        return f"{self.categoryNo}:{self.categoryName}"
 
 # 顧客マスタ
 class Customer(models.Model):
@@ -36,7 +42,7 @@ class Customer(models.Model):
 class Project(models.Model):
     projectNo = models.CharField(max_length=5, primary_key=True)
     projectName = models.CharField(max_length=255, null=True, blank=True)
-    customerNo = models.ForeignKey(Customer, on_delete=models.CASCADE, to_field='customerNo', db_column='customerNo')
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, to_field='customerNo', db_column='customerNo')
     planTime = models.IntegerField(default=0)
     resultTime = models.IntegerField(default=0)
 
@@ -45,7 +51,7 @@ class Project(models.Model):
         verbose_name = "プロジェクト"
 
     def __str__(self):
-        return self.projectName or self.projectNo
+        return f"{self.projectNo}:{self.projectName}"
 
 # 部員マスタ
 class CustomUserManager(BaseUserManager):
@@ -89,3 +95,19 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.userName
+
+class WorkRecord(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, to_field='userNo', db_column='userNo')
+    workDay = models.DateField()
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, to_field='projectNo', db_column='projectNo')
+    customerNo = models.IntegerField()
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, to_field='categoryNo', db_column='categoryNo')
+    process = models.ForeignKey(Process, on_delete=models.CASCADE, to_field='processNo', db_column='processNo')
+    planTime = models.IntegerField()
+    resultTime = models.IntegerField()
+
+    class Meta:
+        db_table = 'WorkRecord'
+
+    def __str__(self):
+        return f"{self.user.userName} - {self.workDay} - {self.project.projectName} - {self.process.processName}"

@@ -8,6 +8,7 @@ router.register("category", views.CategoryViewSet)
 router.register("user", views.UserViewSet)
 router.register("customer", views.CustomerViewSet)
 router.register("project", views.ProjectViewSet)
+router.register("work-record", views.WorkRecordViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),
